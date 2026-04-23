@@ -34,10 +34,6 @@ NVIDIA_API_KEY=your_nvidia_api_key
 CLOUD_FLARE_API=your_cloudflare_api_token
 ACCOUNT=your_cloudflare_account_id
 
-# Optional (For Real Meta Submission)
-META_ACCESS_TOKEN=
-META_WABA_ID=
-```
 
 ### 3. Run the Application
 ```bash
