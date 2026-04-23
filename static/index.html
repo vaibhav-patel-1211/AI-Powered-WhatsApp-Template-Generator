@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampaignPro | WhatsApp AI Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00a884;
+            --primary-dark: #008069;
+            --surface: #111b21;
+            --bg: #0b141a;
+            --card: #202c33;
+            --text-p: #e9edef;
+            --text-s: #8696a0;
+            --border: #313d45;
+            --accent: #53bdeb;
+            --success: #06d755;
+            --warning: #ffd279;
+            --danger: #ff5e5e;
+            --radius-lg: 20px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text-p); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Navigation */
+        nav {
+            height: 70px; background: var(--surface); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; font-weight: 800; font-size: 1.4rem; color: var(--primary); }
+        .logo i { font-size: 2rem; }
+        .nav-actions { display: flex; gap: 15px; }
+
+        /* Layout */
+        main { flex: 1; display: grid; grid-template-columns: 350px 1fr 380px; height: calc(100vh - 70px); }
+
+        /* Sidebar - Editor */
+        .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 30px; }
+        .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-s); letter-spacing: 1.5px; margin-bottom: 20px; display: block; }
+        
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; color: var(--text-s); }
+        input, textarea, select {
+            width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 16px; color: var(--text-p); font-size: 0.95rem; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0, 168, 132, 0.1); }
+        textarea { height: 120px; resize: none; }
+
+        /* Media Box */
+        .media-box {
+            border: 2px dashed var(--border); border-radius: 16px; padding: 30px 15px; text-align: center;
+            cursor: pointer; transition: 0.3s; color: var(--text-s); margin-bottom: 25px;
+        }
+        .media-box:hover { border-color: var(--primary); background: rgba(0, 168, 132, 0.05); }
+        .media-box i { font-size: 2rem; margin-bottom: 10px; }
+
+        /* Buttons Config */
+        .action-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+        .action-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .btn-remove { color: var(--text-s); background: none; border: none; cursor: pointer; padding: 5px; }
+        .btn-remove:hover { color: var(--danger); }
+
+        /* Center - Preview */
+        .content { 
+            background: #0c141a; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-size: cover; background-blend-mode: overlay; 
+            padding: 60px 40px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            overflow-y: auto; 
+        }
+        .whatsapp-view { width: 100%; max-width: 400px; filter: drop-shadow(0 20px 50px rgba(0,0,0,0.3)); flex-shrink: 0; }
+        .bubble { background: var(--card); border-radius: 12px; border-top-left-radius: 0; padding: 6px; position: relative; }
+        .bubble::after { content: ""; position: absolute; left: -10px; top: 0; border-width: 0 12px 12px 0; border-style: solid; border-color: transparent var(--card) transparent transparent; }
+        .bubble-img { width: 100%; border-radius: 8px; display: block; aspect-ratio: 16/9; object-fit: cover; }
+        .bubble-content { padding: 10px; }
+        .bubble-h { font-weight: 700; font-size: 1rem; margin-bottom: 5px; }
+        .bubble-b { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; color: #d1d7db; }
+        .bubble-meta { font-size: 0.7rem; color: #8696a0; text-align: right; margin-top: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+        .wa-btns { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .wa-btn { background: var(--card); color: var(--accent); padding: 12px; text-align: center; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
+
+        /* Right Panel - Analytics */
+        .analytics { background: var(--surface); border-left: 1px solid var(--border); overflow-y: auto; padding: 30px; }
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .metric-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+        .metric-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .metric-lab { font-size: 0.7rem; color: var(--text-s); text-transform: uppercase; margin-top: 5px; }
+
+        .status-badge { display: flex; align-items: center; gap: 10px; padding: 15px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+        .status-safe { background: rgba(6, 215, 85, 0.1); color: var(--success); border: 1px solid rgba(6, 215, 85, 0.2); }
+        .status-risk { background: rgba(255, 210, 121, 0.1); color: var(--warning); border: 1px solid rgba(255, 210, 121, 0.2); }
+
+        .json-viewer { background: #000; padding: 15px; border-radius: 12px; font-family: monospace; font-size: 0.8rem; color: var(--success); height: 200px; overflow-y: auto; }
+
+        /* Workflow Stepper */
+        .stepper { display: flex; flex-direction: column; gap: 20px; margin-top: 30px; }
+        .step { display: flex; align-items: center; gap: 15px; opacity: 0.4; transition: 0.5s; }
+        .step.active { opacity: 1; }
+        .step-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); }
+        .step.active .step-icon { border-color: var(--primary); color: var(--primary); }
+        .step.done .step-icon { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Buttons */
+        .btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-p:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-s { background: var(--card); color: var(--text-p); border: 1px solid var(--border); }
+        .btn-outline { width: 100%; border: 1px dashed var(--border); background: none; color: var(--text-s); justify-content: center; }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-c { background: var(--surface); width: 500px; padding: 40px; border-radius: 24px; border: 1px solid var(--border); }
+
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo"><i class="fab fa-whatsapp"></i> CampaignPro AI</div>
+        <div class="nav-actions">
+            <button class="btn btn-s" onclick="toggleHistory()"><i class="fas fa-history"></i> History</button>
+            <button class="btn btn-p" onclick="openAi()"><i class="fas fa-magic"></i> AI Designer</button>
+            <button class="btn btn-p" id="save" onclick="deployTemplate()"><i class="fas fa-paper-plane"></i> Deploy to Meta</button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Editor Sidebar -->
+        <aside class="sidebar">
+            <span class="section-label">Content Builder</span>
+            
+            <div class="input-group">
+                <label>Header Visual</label>
+                <div class="media-box" id="drop">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p id="dropText">Upload 16:9 Image</p>
+                    <input type="file" id="imgUpload" hidden>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Headline</label>
+                <input type="text" id="hInput" placeholder="Enter bold heading...">
+            </div>
+
+            <div class="input-group">
+                <label>Body Message</label>
+                <textarea id="bInput" placeholder="Write your message..."></textarea>
+            </div>
+
+            <span class="section-label">Interactive Buttons</span>
+            <div id="btnList"></div>
+            <button class="btn btn-outline" id="addBtn">+ Add Interaction</button>
+        </aside>
+
+        <!-- Preview Canvas -->
+        <section class="content">
+            <div class="whatsapp-view">
+                <div id="capture" class="bubble">
+                    <img id="pImg" class="bubble-img hidden">
+                    <div class="bubble-content">
+                        <div id="pH" class="bubble-h"></div>
+                        <div id="pB" class="bubble-b"></div>
+                        <div class="bubble-meta">
+                            12:45 PM <i class="fas fa-check-double" style="color:#53bdeb"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="pBtns" class="wa-btns"></div>
+                
+                <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button class="btn btn-s" id="copyT"><i class="far fa-copy"></i> Copy Text</button>
+                    <button class="btn btn-s" id="down"><i class="fas fa-file-image"></i> Export PNG</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Panel -->
+        <aside class="analytics">
+            <span class="section-label">Marketing Analysis</span>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-val" id="mScore">--</span>
+                    <span class="metric-lab">Engagement</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-val" id="mSent">--</span>
+                    <span class="metric-lab">Tone</span>
+                </div>
+            </div>
+
+            <span class="section-label">Meta Policy Guard</span>
+            <div id="compBadge" class="status-badge status-safe hidden">
+                <i class="fas fa-shield-check"></i>
+                <span id="compStatus">Safe to Deploy</span>
+            </div>
+            <p id="compReason" style="font-size: 0.85rem; color: var(--text-s); margin-bottom: 30px;">Generate a campaign to see compliance metrics.</p>
+
+            <span class="section-label">Developer API Payload</span>
+            <pre class="json-viewer" id="jsonView">// JSON will appear here</pre>
+        </aside>
+    </main>
+
+    <!-- Deploy Workflow Modal -->
+    <div id="deployModal" class="modal">
+        <div class="modal-c">
+            <h2 style="margin-bottom:10px;">Meta Deployment</h2>
+            <p style="color:var(--text-s); margin-bottom:30px;">Submitting template to Meta Graph API for review.</p>
+            
+            <div class="stepper">
+                <div class="step active" id="step1">
+                    <div class="step-icon"><i class="fas fa-file-export"></i></div>
+                    <div>
+                        <div style="font-weight:700">Packaging Payload</div>
+                        <div style="font-size:0.8rem; color:var(--text-s)">Formatting components for API</div>
+                    </div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-icon"><i class="fab fa-facebook"></i></div>
+                    <div>
+                        <div style="font-weight:700">Meta Network Handshake</div>
+                        <div style="font-size:0.8rem; color:var(--text-s)">Sending to WhatsApp Business Server</div>
+                    </div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-icon"><i class="fas fa-gavel"></i></div>
+                    <div>
+                        <div style="font-weight:700">Meta Review Process</div>
+                        <div style="font-size:0.8rem; color:var(--text-s)">Analyzing for policy compliance</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="deployResult" class="hidden" style="margin-top:30px; padding:20px; background:rgba(6,215,85,0.1); border-radius:12px; border:1px solid var(--primary);">
+                <div style="color:var(--success); font-weight:700; margin-bottom:5px;">Submission Success!</div>
+                <div id="waId" style="font-family:monospace; font-size:0.8rem; color:var(--text-s)"></div>
+            </div>
+
+            <button class="btn btn-s" id="closeDeploy" style="width:100%; margin-top:30px;" onclick="closeDeploy()" disabled>Processing...</button>
+        </div>
+    </div>
+
+    <!-- AI Designer Modal -->
+    <div id="aiModal" class="modal">
+        <div class="modal-c">
+            <h2 style="margin-bottom:15px;">Campaign Objective</h2>
+            <p style="color:var(--text-s); margin-bottom:25px;">Our AI will generate the copy, visual prompt, and compliance analysis.</p>
+            <textarea id="aiPrompt" style="height:150px; margin-bottom:25px;" placeholder="e.g., A special discount for our loyalty members at the Coffee House."></textarea>
+            <div style="display:flex; gap:15px; justify-content:flex-end;">
+                <button class="btn btn-s" onclick="closeAi()">Cancel</button>
+                <button class="btn btn-p" id="runAi">Start Design</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="histModal" class="modal">
+        <div class="modal-c">
+            <h2>Campaign History</h2>
+            <div id="histList" class="history-list" style="margin: 25px 0;"></div>
+            <button class="btn btn-s" style="width:100%" onclick="toggleHistory()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const $ = id => document.getElementById(id);
+        let buttons = [];
+        let history = JSON.parse(localStorage.getItem('wa_history') || '[]');
+
+        // UI Core
+        const updatePreview = () => {
+            $('pH').innerText = $('hInput').value;
+            $('pH').classList.toggle('hidden', !$('hInput').value);
+            $('pB').innerHTML = $('bInput').value.replace(/\n/g, '<br>');
+            $('pBtns').innerHTML = buttons.map(b => `<div class="wa-btn">${b.text || 'Button'}</div>`).join('');
+            
+            const payload = {
+                name: "whatsapp_campaign",
+                components: [
+                    { type: "HEADER", format: "IMAGE" },
+                    { type: "BODY", text: $('bInput').value },
+                    { type: "BUTTONS", buttons: buttons }
+                ]
+            };
+            $('jsonView').innerText = JSON.stringify(payload, null, 2);
+        };
+
+        const deployTemplate = async () => {
+            const h = $('hInput').value;
+            const b = $('bInput').value;
+            if(!h || !b) { alert("Template is empty!"); return; }
+
+            $('deployModal').style.display = 'flex';
+            $('closeDeploy').disabled = true;
+            $('deployResult').classList.add('hidden');
+            
+            const steps = [$('step1'), $('step2'), $('step3')];
+            steps.forEach(s => { s.classList.remove('active', 'done'); });
+            steps[0].classList.add('active');
+
+            try {
+                // Step 1 -> 2
+                await new Promise(r => setTimeout(r, 1500));
+                steps[0].classList.add('done');
+                steps[1].classList.add('active');
+
+                // API Call
+                const res = await fetch('/submit_template', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        heading: h,
+                        body: b,
+                        image_prompt: "User custom",
+                        buttons: buttons,
+                        metrics: { engagement_score: 0, readability: "", sentiment: "", compliance_status: "Safe", compliance_reason: "" }
+                    })
+                });
+                const data = await res.json();
+
+                // Step 2 -> 3
+                await new Promise(r => setTimeout(r, 1500));
+                steps[1].classList.add('done');
+                steps[2].classList.add('active');
+
+                // Final Step
+                await new Promise(r => setTimeout(r, 1500));
+                steps[2].classList.add('done');
+                
+                $('deployResult').classList.remove('hidden');
+                $('waId').innerText = "Meta ID: " + (data.id || data.error || "N/A");
+                $('closeDeploy').disabled = false;
+                $('closeDeploy').innerText = "Back to Workspace";
+                
+            } catch (e) {
+                alert("Deployment Failed");
+                closeDeploy();
+            }
+        };
+
+        window.closeDeploy = () => $('deployModal').style.display = 'none';
+
+        // Button System
+        $('addBtn').onclick = () => {
+            if (buttons.length >= 3) return;
+            buttons.push({ type: 'quick_reply', text: 'New Action' });
+            renderBtnEditor();
+        };
+
+        const renderBtnEditor = () => {
+            $('btnList').innerHTML = buttons.map((b, i) => `
+                <div class="action-card">
+                    <div class="action-header">
+                        <select onchange="uBtn(${i}, 'type', this.value)">
+                            <option value="quick_reply" ${b.type==='quick_reply'?'selected':''}>Reply</option>
+                            <option value="url" ${b.type==='url'?'selected':''}>URL</option>
+                        </select>
+                        <input type="text" value="${b.text}" oninput="uBtn(${i}, 'text', this.value)">
+                        <button class="btn-remove" onclick="rBtn(${i})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            updatePreview();
+        };
+
+        window.uBtn = (i, k, v) => { buttons[i][k] = v; updatePreview(); };
+        window.rBtn = (i) => { buttons.splice(i, 1); renderBtnEditor(); };
+
+        // AI System
+        window.openAi = () => $('aiModal').style.display = 'flex';
+        window.closeAi = () => $('aiModal').style.display = 'none';
+
+        $('runAi').onclick = async () => {
+            const p = $('aiPrompt').value;
+            if(!p) return;
+            
+            $('runAi').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            try {
+                const res = await fetch('/generate_template', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_input: p, num_variations: 1 })
+                });
+                const [data] = await res.json();
+                
+                $('hInput').value = data.heading;
+                $('bInput').value = data.body;
+                buttons = data.buttons;
+                renderBtnEditor();
+                
+                $('mScore').innerText = data.metrics.engagement_score + '%';
+                $('mSent').innerText = data.metrics.sentiment;
+                $('compBadge').classList.remove('hidden');
+                $('compBadge').className = `status-badge status-${data.metrics.compliance_status.toLowerCase()}`;
+                $('compStatus').innerText = data.metrics.compliance_status;
+                $('compReason').innerText = data.metrics.compliance_reason;
+                
+                saveToHistory(data);
+                pollImg(data.image_path);
+                closeAi();
+            } catch (e) { alert("AI Generation Error"); }
+            finally { $('runAi').innerText = 'Start Design'; }
+        };
+
+        const saveToHistory = (data) => {
+            history.unshift({ ...data, date: new Date().toLocaleDateString() });
+            if(history.length > 5) history.pop();
+            localStorage.setItem('wa_history', JSON.stringify(history));
+            renderHistory();
+        };
+
+        const renderHistory = () => {
+            $('histList').innerHTML = history.map((item, i) => `
+                <div class="history-item" onclick="loadHistory(${i})">
+                    <div style="font-weight:700">${item.heading}</div>
+                    <div style="font-size:0.7rem; color:var(--text-s)">${item.date} • ${item.style}</div>
+                </div>
+            `).join('') || '<p style="color:var(--text-s)">No history yet.</p>';
+        };
+
+        window.loadHistory = (i) => {
+            const item = history[i];
+            $('hInput').value = item.heading;
+            $('bInput').value = item.body;
+            buttons = item.buttons;
+            renderBtnEditor();
+            $('pImg').src = item.image_path;
+            $('pImg').classList.remove('hidden');
+            toggleHistory();
+        };
+
+        window.toggleHistory = () => {
+            const modal = $('histModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            renderHistory();
+        };
+
+        const pollImg = (url) => {
+            $('dropText').innerText = "Generating Image...";
+            let timer = setInterval(() => {
+                let img = new Image();
+                img.onload = () => {
+                    $('pImg').src = url;
+                    $('pImg').classList.remove('hidden');
+                    $('dropText').innerText = "Campaign Visual Ready";
+                    clearInterval(timer);
+                };
+                img.src = url + "?t=" + Date.now();
+            }, 3000);
+        };
+
+        // Utilities
+        $('drop').onclick = () => $('imgUpload').click();
+        $('imgUpload').onchange = (e) => {
+            if (!e.target.files[0]) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                $('pImg').src = ev.target.result;
+                $('pImg').classList.remove('hidden');
+                $('dropText').innerText = "Custom Image Loaded";
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        $('copyT').onclick = () => {
+            navigator.clipboard.writeText($('bInput').value);
+            alert("Copied to clipboard!");
+        };
+
+        $('down').onclick = () => {
+            html2canvas($('capture')).then(canvas => {
+                const a = document.createElement('a');
+                a.download = 'campaign.png';
+                a.href = canvas.toDataURL();
+                a.click();
+            });
+        };
+
+        $('hInput').oninput = $('bInput').oninput = updatePreview;
+        renderHistory();
+        updatePreview();
+    </script>
+</body>
+</html>
