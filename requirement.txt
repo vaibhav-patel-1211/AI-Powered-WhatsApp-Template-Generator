@@ -1,0 +1,7 @@
+uvicorn
+pydantic
+langchain-core
+langchain-nvidia-ai-endpoints
+python-dotenv
+requests
+fastapi
